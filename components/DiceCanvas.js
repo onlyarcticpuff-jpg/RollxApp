@@ -3,9 +3,6 @@
 import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 
-const lastTickRef = useRef(null);
-const soundsRef = useRef({});
-
 export default function DiceCanvas({
   target = 50.5,
   onTargetChange,
@@ -15,6 +12,8 @@ export default function DiceCanvas({
 }) {
   const containerRef = useRef(null);
   const refs = useRef({});
+  const lastTickRef = useRef(null);
+const soundsRef = useRef({});
 
   useEffect(() => {
     if (!refs.current?.setTargetVisual) return;
