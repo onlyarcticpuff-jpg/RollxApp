@@ -11,7 +11,7 @@ export default function DiceCanvas() {
 
     async function setup() {
       const width = Math.min(window.innerWidth, 430);
-      const height = 260;
+      const height = 240;
 
       app = new PIXI.Application();
 
@@ -27,94 +27,104 @@ export default function DiceCanvas() {
       containerRef.current.innerHTML = '';
       containerRef.current.appendChild(app.canvas);
 
-      const trackTexture = await PIXI.Assets.load('/slider-track.png');
       const bubbleTexture = await PIXI.Assets.load('/indicator.png');
-      const glowTexture = await PIXI.Assets.load('/glow.png');
 
       const centerX = width / 2;
-      const trackY = 150;
+      const trackX = 34;
+      const trackW = width - 68;
+      const trackY = 135;
+      const trackH = 34;
 
-      const glow = new PIXI.Sprite(glowTexture);
-      glow.anchor.set(0.5);
-      glow.x = centerX;
-      glow.y = trackY;
-      glow.width = 260;
-      glow.height = 90;
-      glow.alpha = 0.45;
-      app.stage.addChild(glow);
+      const trackBg = new PIXI.Graphics();
+      trackBg.roundRect(trackX, trackY - trackH / 2, trackW, trackH, 18);
+      trackBg.fill('#233846');
+      app.stage.addChild(trackBg);
 
-      const labels = [0, 25, 50, 75, 100];
+      const inner = new PIXI.Graphics();
+      inner.roundRect(trackX + 10, trackY - 8, trackW - 20, 16, 8);
+      inner.fill('#07141c');
+      app.stage.addChild(inner);
 
-      labels.forEach((num) => {
-        const x = 42 + (num / 100) * (width - 84);
+      const splitX = trackX + trackW * 0.505;
 
-        const text = new PIXI.Text({
+      const red = new PIXI.Graphics();
+      red.roundRect(trackX + 14, trackY - 5, splitX - trackX - 14, 10, 5);
+      red.fill('#ff174f');
+      app.stage.addChild(red);
+
+      const green = new PIXI.Graphics();
+      green.roundRect(splitX, trackY - 5, trackX + trackW - splitX - 14, 10, 5);
+      green.fill('#00e91f');
+      app.stage.addChild(green);
+
+      [0, 25, 50, 75, 100].forEach((num) => {
+        const x = trackX + (num / 100) * trackW;
+
+        const label = new PIXI.Text({
           text: String(num),
           style: {
             fill: '#ffffff',
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: '700',
             fontFamily: 'Arial'
           }
         });
 
-        text.anchor.set(0.5);
-        text.x = x;
-        text.y = 78;
-        app.stage.addChild(text);
-      });
+        label.anchor.set(0.5);
+        label.x = x;
+        label.y = 70;
+        app.stage.addChild(label);
 
-      const track = new PIXI.Sprite(trackTexture);
-      track.anchor.set(0.5);
-      track.x = centerX;
-      track.y = trackY;
-      track.width = width - 42;
-      track.height = 34;
-      app.stage.addChild(track);
+        const tick = new PIXI.Graphics();
+        tick.moveTo(x, 94);
+        tick.lineTo(x, 105);
+        tick.stroke({ width: 2, color: '#2d4656' });
+        app.stage.addChild(tick);
+      });
 
       const bubble = new PIXI.Sprite(bubbleTexture);
       bubble.anchor.set(0.5);
-      bubble.x = centerX;
-      bubble.y = 112;
-      bubble.width = 70;
-      bubble.height = 70;
+      bubble.x = splitX;
+      bubble.y = 88;
+      bubble.width = 54;
+      bubble.height = 54;
       app.stage.addChild(bubble);
 
       const resultText = new PIXI.Text({
         text: '50.50',
         style: {
-          fill: '#0cff3a',
-          fontSize: 17,
+          fill: '#00ff38',
+          fontSize: 14,
           fontWeight: '900',
           fontFamily: 'Arial'
         }
       });
 
       resultText.anchor.set(0.5);
-      resultText.x = bubble.x;
-      resultText.y = bubble.y - 1;
+      resultText.x = splitX;
+      resultText.y = 88;
       app.stage.addChild(resultText);
 
       const knob = new PIXI.Graphics();
-      knob.roundRect(0, 0, 46, 46, 10);
+      knob.roundRect(0, 0, 44, 44, 10);
       knob.fill('#139cf2');
-      knob.stroke({ width: 3, color: '#1fc0ff' });
-      knob.x = centerX - 23;
-      knob.y = trackY - 23;
+      knob.stroke({ width: 3, color: '#23bfff' });
+      knob.x = splitX - 22;
+      knob.y = trackY - 22;
       app.stage.addChild(knob);
 
       const knobLines = new PIXI.Text({
         text: '|||',
         style: {
           fill: '#0b6fb8',
-          fontSize: 20,
+          fontSize: 16,
           fontWeight: '900',
           fontFamily: 'Arial'
         }
       });
 
       knobLines.anchor.set(0.5);
-      knobLines.x = centerX;
+      knobLines.x = splitX;
       knobLines.y = trackY;
       app.stage.addChild(knobLines);
     }
@@ -134,7 +144,7 @@ export default function DiceCanvas() {
         overflow: 'hidden',
         display: 'flex',
         justifyContent: 'center',
-        paddingTop: 30
+        paddingTop: 24
       }}
     />
   );
