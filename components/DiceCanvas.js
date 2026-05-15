@@ -281,17 +281,36 @@ export default function DiceCanvas({
         const strokeColor = isWin ? '#00ff38' : '#ff174f';
         const textColor = isWin ? '#00ff38' : '#ff174f';
 
-        r.bubble.clear();
-
         // pin bubble
-        r.bubble.roundRect(r.currentX - 34, 38, 68, 32, 16);
-        r.bubble.moveTo(r.currentX - 8, 68);
-        r.bubble.lineTo(r.currentX, 80);
-        r.bubble.lineTo(r.currentX + 8, 68);
-        r.bubble.closePath();
+        // connected pin bubble shape
+r.bubble.clear();
 
-        r.bubble.fill('#101b24');
-        r.bubble.stroke({ width: 2, color: strokeColor });
+const x = r.currentX;
+const y = 38;
+const w = 74;
+const h = 34;
+const radius = 17;
+const pointH = 13;
+
+r.bubble.moveTo(x - w / 2 + radius, y);
+r.bubble.lineTo(x + w / 2 - radius, y);
+r.bubble.quadraticCurveTo(x + w / 2, y, x + w / 2, y + radius);
+r.bubble.lineTo(x + w / 2, y + h - radius);
+r.bubble.quadraticCurveTo(x + w / 2, y + h, x + w / 2 - radius, y + h);
+
+r.bubble.lineTo(x + 9, y + h);
+r.bubble.lineTo(x, y + h + pointH);
+r.bubble.lineTo(x - 9, y + h);
+
+r.bubble.lineTo(x - w / 2 + radius, y + h);
+r.bubble.quadraticCurveTo(x - w / 2, y + h, x - w / 2, y + h - radius);
+r.bubble.lineTo(x - w / 2, y + radius);
+r.bubble.quadraticCurveTo(x - w / 2, y, x - w / 2 + radius, y);
+r.bubble.closePath();
+
+r.bubble.fill('#101b24');
+r.bubble.stroke({ width: 2, color: strokeColor });
+r.bubble.alpha = r.opacity; });
         r.bubble.alpha = r.opacity;
 
         r.bubbleText.text = Number(r.finalRoll).toFixed(2);
