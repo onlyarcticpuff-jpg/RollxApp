@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DiceCanvas from '../components/DiceCanvas';
+import DiceCanvas from '../../components/DiceCanvas';
+import BottomNav from '../../components/BottomNav';
 
-export default function Home() {
+export default function DiceGame() {
   const [tgUser, setTgUser] = useState(null);
   const [user, setUser] = useState(null);
   const [bet, setBet] = useState(100);
@@ -81,7 +82,7 @@ export default function Home() {
   return (
     <main style={styles.page}>
       <div style={styles.top}>
-        <h1>RollX</h1>
+        <h1>🎲 Dice</h1>
         <div style={styles.balance}>{balance.toFixed(2)}</div>
       </div>
 
@@ -127,7 +128,7 @@ export default function Home() {
         <div style={styles.profit}>{profitOnWin.toFixed(2)} credits</div>
 
         <button style={styles.rollBtn} onClick={playDice} disabled={loading}>
-          {loading ? 'Rolling...' : 'Bet'}
+          {loading ? 'Rolling...' : 'BET'}
         </button>
 
         {result && (
@@ -136,6 +137,8 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      <BottomNav />
     </main>
   );
 }
@@ -146,6 +149,7 @@ const styles = {
     background: '#080d16',
     color: 'white',
     padding: 18,
+    paddingBottom: 100,
     fontFamily: 'system-ui'
   },
   top: {
