@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
-import { money } from '@/lib/gameEngine';
-import { playDice } from '@/lib/games/dice';
+import { money } from '../../../../lib/gameEngine';
+import { playDice } from '../../../../lib/games/dice';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
