@@ -3,26 +3,19 @@
 import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 
-export default function DiceCanvas({ roll = 50.5, target = 50.5, condition = 'over', result = null }) {
+export default function DiceCanvas({ target = 50.5, roll, result, rollKey }) {
   const containerRef = useRef(null);
-  const stateRef = useRef({ roll, target, condition, result });
-
-  useEffect(() => {
-    stateRef.current = { roll, target, condition, result };
-  }, [roll, target, condition, result]);
+  const refs = useRef({});
 
   useEffect(() => {
     let app;
-    let knob;
-    let bubble;
-    let bubbleText;
-    let currentX = 0;
 
     async function setup() {
       const width = Math.min(window.innerWidth, 430);
       const height = 240;
 
       app = new PIXI.Application();
+
       await app.init({
         width,
         height,
@@ -41,7 +34,7 @@ export default function DiceCanvas({ roll = 50.5, target = 50.5, condition = 'ov
       const trackH = 34;
 
       const getX = (value) => trackX + (Number(value) / 100) * trackW;
-      currentX = getX(target);
+      const targetX = getX(target);
 
       const bg = new PIXI.Graphics();
       bg.roundRect(trackX, trackY - trackH / 2, trackW, trackH, 18);
@@ -54,99 +47,142 @@ export default function DiceCanvas({ roll = 50.5, target = 50.5, condition = 'ov
       app.stage.addChild(inner);
 
       const red = new PIXI.Graphics();
-      red.roundRect(trackX + 14, trackY - 5, getX(target) - trackX - 14, 10, 5);
+      red.roundRect(trackX + 14, trackY - 5, targetX - trackX - 14, 10, 5);
       red.fill('#ff174f');
       app.stage.addChild(red);
 
       const green = new PIXI.Graphics();
-      green.roundRect(getX(target), trackY - 5, trackX + trackW - getX(target) - 14, 10, 5);
+      green.roundRect(targetX, trackY - 5, trackX + trackW - targetX - 14, 10, 5);
       green.fill('#00e91f');
       app.stage.addChild(green);
 
-      [0, 25, 50, 75, 100].forEach((num) => {
+      for (let num = 0; num <= 100; num += 5) {
         const x = getX(num);
 
-        const label = new PIXI.Text({
-          text: String(num),
-          style: {
-            fill: '#ffffff',
-            fontSize: 16,
-            fontWeight: '700',
-            fontFamily: 'Arial'
-          }
-        });
-
-        label.anchor.set(0.5);
-        label.x = x;
-        label.y = 70;
-        app.stage.addChild(label);
-
         const tick = new PIXI.Graphics();
-        tick.moveTo(x, 94);
-        tick.lineTo(x, 105);
-        tick.stroke({ width: 2, color: '#2d4656' });
+        tick.moveTo(x, 98);
+        tick.lineTo(x, num % 25 === 0 ? 108 : 103);
+        tick.stroke({
+          width: num % 25 === 0 ? 2 : 1,
+          color: '#2d4656'
+        });
         app.stage.addChild(tick);
-      });
 
-      bubble = new PIXI.Graphics();
-      app.stage.addChild(bubble);
+        if (num % 25 === 0) {
+          const label = new PIXI.Text({
+            text: String(num),
+            style: {
+              fill: '#ffffff',
+              fontSize: 13,
+              fontWeight: '700',
+              fontFamily: 'Arial'
+            }
+          });
 
-      bubbleText = new PIXI.Text({
-        text: Number(roll).toFixed(2),
-        style: {
-          fill: '#00ff38',
-          fontSize: 14,
-          fontWeight: '900',
-          fontFamily: 'Arial'
+          label.anchor.set(0.5);
+          label.x = x;
+          label.y = 72;
+          app.stage.addChild(label);
         }
-      });
-      bubbleText.anchor.set(0.5);
-      app.stage.addChild(bubbleText);
+      }
 
-      knob = new PIXI.Graphics();
+      const knob = new PIXI.Graphics();
+      knob.roundRect(targetX - 22, trackY - 22, 44, 44, 10);
+      knob.fill('#139cf2');
+      knob.stroke({ width: 3, color: '#23bfff' });
       app.stage.addChild(knob);
 
       const knobLines = new PIXI.Text({
         text: '|||',
         style: {
           fill: '#0b6fb8',
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: '900',
           fontFamily: 'Arial'
         }
       });
+
       knobLines.anchor.set(0.5);
+      knobLines.x = targetX;
+      knobLines.y = trackY;
       app.stage.addChild(knobLines);
 
-      function drawAt(x) {
-        const isWin = stateRef.current.result === 'win';
-        const color = isWin ? '#00ff38' : stateRef.current.result === 'loss' ? '#ff174f' : '#ffffff';
+      const bubble = new PIXI.Graphics();
+      bubble.alpha = 0;
+      app.stage.addChild(bubble);
 
-        knob.clear();
-        knob.roundRect(x - 22, trackY - 22, 44, 44, 10);
-        knob.fill('#139cf2');
-        knob.stroke({ width: 3, color: '#23bfff' });
+      const bubbleText = new PIXI.Text({
+        text: '',
+        style: {
+          fill: '#ffffff',
+          fontSize: 13,
+          fontWeight: '900',
+          fontFamily: 'Arial'
+        }
+      });
 
-        knobLines.x = x;
-        knobLines.y = trackY;
+      bubbleText.anchor.set(0.5);
+      bubbleText.alpha = 0;
+      app.stage.addChild(bubbleText);
 
-        bubble.clear();
-        bubble.roundRect(x - 38, 42, 76, 34, 17);
-        bubble.fill('#101b24');
-        bubble.stroke({ width: 2, color: isWin ? '#00ff38' : '#37566a' });
-
-        bubbleText.text = Number(stateRef.current.roll).toFixed(2);
-        bubbleText.style.fill = color;
-        bubbleText.x = x;
-        bubbleText.y = 59;
-      }
-
-      drawAt(currentX);
+      refs.current = {
+        app,
+        getX,
+        bubble,
+        bubbleText,
+        currentX: targetX,
+        targetX,
+        animating: false,
+        phase: 'idle',
+        opacity: 0,
+        finalX: targetX,
+        finalRoll: null,
+        result: null,
+        frame: 0
+      };
 
       app.ticker.add(() => {
-        const wantedX = getX(stateRef.current.roll || stateRef.current.target);
-        currentX += (wantedX - currentX) * 0.08;
-        drawAt(currentX);
+        const r = refs.current;
+        if (!r.animating) return;
+
+        r.frame++;
+
+        r.currentX += (r.finalX - r.currentX) * 0.085;
+
+        if (r.phase === 'in') {
+          r.opacity += 0.08;
+          if (r.opacity >= 1) {
+            r.opacity = 1;
+            r.phase = 'hold';
+            r.frame = 0;
+          }
+        } else if (r.phase === 'hold') {
+          if (r.frame > 55) {
+            r.phase = 'out';
+          }
+        } else if (r.phase === 'out') {
+          r.opacity -= 0.045;
+          if (r.opacity <= 0) {
+            r.opacity = 0;
+            r.animating = false;
+          }
+        }
+
+        const isWin = r.result === 'win';
+        const strokeColor = isWin ? '#00ff38' : '#ff174f';
+        const textColor = isWin ? '#00ff38' : '#ff174f';
+
+        r.bubble.clear();
+        r.bubble.roundRect(r.currentX - 38, 42, 76, 34, 17);
+        r.bubble.fill('#101b24');
+        r.bubble.stroke({ width: 2, color: strokeColor });
+        r.bubble.alpha = r.opacity;
+
+        r.bubbleText.text = Number(r.finalRoll).toFixed(2);
+        r.bubbleText.style.fill = textColor;
+        r.bubbleText.x = r.currentX;
+        r.bubbleText.y = 59;
+        r.bubbleText.alpha = r.opacity;
       });
     }
 
@@ -155,7 +191,22 @@ export default function DiceCanvas({ roll = 50.5, target = 50.5, condition = 'ov
     return () => {
       if (app) app.destroy(true, true);
     };
-  }, []);
+  }, [target]);
+
+  useEffect(() => {
+    if (!roll || !refs.current?.getX) return;
+
+    const r = refs.current;
+
+    r.currentX = r.targetX;
+    r.finalX = r.getX(roll);
+    r.finalRoll = roll;
+    r.result = result;
+    r.opacity = 0;
+    r.phase = 'in';
+    r.frame = 0;
+    r.animating = true;
+  }, [rollKey]);
 
   return (
     <div
@@ -169,4 +220,4 @@ export default function DiceCanvas({ roll = 50.5, target = 50.5, condition = 'ov
       }}
     />
   );
-        }
+}
