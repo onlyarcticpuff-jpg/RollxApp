@@ -281,8 +281,7 @@ export default function DiceCanvas({
         const strokeColor = isWin ? '#00ff38' : '#ff174f';
         const textColor = isWin ? '#00ff38' : '#ff174f';
 
-        // pin bubble
-        // connected pin bubble shape
+// connected pin bubble shape
 r.bubble.clear();
 
 const x = r.currentX;
@@ -310,14 +309,13 @@ r.bubble.closePath();
 
 r.bubble.fill('#101b24');
 r.bubble.stroke({ width: 2, color: strokeColor });
-r.bubble.alpha = r.opacity; });
-        r.bubble.alpha = r.opacity;
+r.bubble.alpha = r.opacity;
 
-        r.bubbleText.text = Number(r.finalRoll).toFixed(2);
-        r.bubbleText.style.fill = textColor;
-        r.bubbleText.x = r.currentX;
-        r.bubbleText.y = 54;
-        r.bubbleText.alpha = r.opacity;
+r.bubbleText.text = Number(r.finalRoll).toFixed(2);
+r.bubbleText.style.fill = textColor;
+r.bubbleText.x = r.currentX;
+r.bubbleText.y = 54;
+r.bubbleText.alpha = r.opacity;
       });
     }
 
