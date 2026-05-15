@@ -1,21 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DiceCanvas from '../components/DiceCanvas';
+import Link from 'next/link';
+import BottomNav from '../components/BottomNav';
 
 export default function Home() {
   const [tgUser, setTgUser] = useState(null);
   const [user, setUser] = useState(null);
-  const [bet, setBet] = useState(100);
-  const [target, setTarget] = useState(50.5);
-  const [result, setResult] = useState(null);
-  const [rollKey, setRollKey] = useState(0);
-  const [loading, setLoading] = useState(false);
 
   async function loadUser(telegramId) {
     const res = await fetch(`/api/me?telegram_id=${telegramId}`);
     const data = await res.json();
-
     if (!data.error) setUser(data);
   }
 
@@ -31,40 +26,6 @@ export default function Home() {
     loadUser(telegramUser.id);
   }, []);
 
-  async function playDice() {
-    if (!tgUser?.id || loading) return;
-
-    setLoading(true);
-
-    const res = await fetch('/api/games/play', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        telegram_id: tgUser.id,
-        game_id: 'dice',
-        bet_amount: Number(bet),
-        target,
-        condition: 'over'
-      })
-    });
-
-    const data = await res.json();
-    setLoading(false);
-
-    if (data.error) {
-      alert(data.error);
-      return;
-    }
-
-    setResult(data);
-    setRollKey((v) => v + 1);
-
-    setUser((prev) => ({
-      ...prev,
-      balance: data.balance
-    }));
-  }
-
   if (!tgUser) {
     return (
       <main style={styles.page}>
@@ -75,69 +36,59 @@ export default function Home() {
   }
 
   const balance = Number(user?.balance || 0);
-  const winChance = 100 - target;
-  const multiplier = 99 / winChance;
-  const profitOnWin = Number(bet) * multiplier - Number(bet);
 
   return (
     <main style={styles.page}>
-      <div style={styles.top}>
-        <h1>RollX</h1>
-        <div style={styles.balance}>{balance.toFixed(2)}</div>
-      </div>
-
-      <DiceCanvas
-  target={target}
-  onTargetChange={setTarget}
-  roll={result?.roll}
-  result={result?.result}
-  rollKey={rollKey}
-/>
-
-      <div style={styles.panel}>
-        <div style={styles.stats}>
-          <div>
-            <span>Multiplier</span>
-            <b>{multiplier.toFixed(4)}×</b>
-          </div>
-          <div>
-            <span>Roll Over</span>
-            <b>{target.toFixed(2)}</b>
-          </div>
-          <div>
-            <span>Win Chance</span>
-            <b>{winChance.toFixed(2)}%</b>
-          </div>
+      <section style={styles.header}>
+        <div>
+          <p style={styles.eyebrow}>Welcome back</p>
+          <h1 style={styles.title}>RollX</h1>
         </div>
 
-        <label>Bet Amount</label>
-        <input
-          style={styles.input}
-          type="number"
-          value={bet}
-          onChange={(e) => setBet(Number(e.target.value))}
-        />
+        <div style={styles.balance}>
+          <span style={styles.balanceLabel}>Balance</span>
+          <b>{balance.toFixed(2)}</b>
+        </div>
+      </section>
 
-        <div style={styles.quick}>
-          <button onClick={() => setBet(Math.max(1, bet / 2))}>½</button>
-          <button onClick={() => setBet(bet * 2)}>2×</button>
-          <button onClick={() => setBet(balance)}>MAX</button>
+      <section style={styles.hero}>
+        <div>
+          <p style={styles.heroLabel}>Featured</p>
+          <h2 style={styles.heroTitle}>Dice is live 🎲</h2>
+          <p style={styles.heroText}>
+            Slide your odds, place a bet, and roll with 99% RTP.
+          </p>
         </div>
 
-        <label>Profit on Win</label>
-        <div style={styles.profit}>{profitOnWin.toFixed(2)} credits</div>
+        <Link href="/games/dice" style={styles.heroButton}>
+          Play Now
+        </Link>
+      </section>
 
-        <button style={styles.rollBtn} onClick={playDice} disabled={loading}>
-          {loading ? 'Rolling...' : 'Bet'}
-        </button>
+      <section style={styles.grid}>
+        <GameCard href="/games/dice" icon="🎲" title="Dice" status="Live" />
+        <GameCard href="/games/cases" icon="📦" title="Cases" status="Soon" />
+        <GameCard href="/games/rocket" icon="🚀" title="Rocket" status="Soon" />
+        <GameCard href="/games/mines" icon="💣" title="Mines" status="Soon" />
+      </section>
 
-        {result && (
-          <div style={styles.result}>
-            {result.result === 'win' ? '🔥 WIN' : '💀 LOSS'} · Roll {Number(result.roll).toFixed(2)}
-          </div>
-        )}
-      </div>
+      <section style={styles.card}>
+        <h3>Daily Bonus</h3>
+        <p>Rewards system coming soon.</p>
+      </section>
+
+      <BottomNav />
     </main>
+  );
+}
+
+function GameCard({ href, icon, title, status }) {
+  return (
+    <Link href={href} style={styles.gameCard}>
+      <div style={styles.gameIcon}>{icon}</div>
+      <b>{title}</b>
+      <span>{status}</span>
+    </Link>
   );
 }
 
@@ -146,71 +97,102 @@ const styles = {
     minHeight: '100vh',
     background: '#080d16',
     color: 'white',
-    padding: 18,
+    padding: '18px 18px 100px',
     fontFamily: 'system-ui'
   },
-  top: {
+  header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
   },
+  eyebrow: {
+    margin: 0,
+    color: '#8fa6b8',
+    fontSize: 13,
+    fontWeight: 800
+  },
+  title: {
+    margin: 0,
+    fontSize: 34,
+    letterSpacing: -1
+  },
   balance: {
     background: '#111c2a',
+    border: '1px solid #294357',
+    borderRadius: 18,
     padding: '10px 14px',
-    borderRadius: 14,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end'
+  },
+  balanceLabel: {
+    color: '#8fa6b8',
+    fontSize: 11,
     fontWeight: 800
   },
-  panel: {
-    background: '#101b27',
-    borderRadius: 22,
-    padding: 16,
-    marginTop: 10
+  hero: {
+    marginTop: 22,
+    background: 'linear-gradient(135deg, #12263a, #101827)',
+    border: '1px solid #284766',
+    borderRadius: 28,
+    padding: 20,
+    minHeight: 150,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    boxShadow: '0 18px 50px rgba(0,0,0,0.25)'
   },
-  stats: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr',
-    gap: 8,
-    marginBottom: 16,
+  heroLabel: {
+    margin: 0,
+    color: '#23bfff',
+    fontWeight: 900,
     fontSize: 12
   },
-  input: {
-    width: '100%',
-    padding: 14,
-    borderRadius: 14,
-    border: '1px solid #294357',
-    background: '#07131d',
-    color: 'white',
-    fontSize: 22,
-    margin: '8px 0 10px',
-    boxSizing: 'border-box'
+  heroTitle: {
+    margin: '6px 0',
+    fontSize: 26
   },
-  quick: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr',
-    gap: 8,
-    marginBottom: 14
+  heroText: {
+    margin: 0,
+    color: '#a8bac9',
+    fontSize: 14
   },
-  profit: {
-    padding: 14,
-    background: '#07131d',
-    borderRadius: 14,
-    margin: '8px 0 14px',
-    color: '#00ff55',
-    fontWeight: 800
-  },
-  rollBtn: {
-    width: '100%',
-    padding: 18,
-    borderRadius: 18,
-    border: 'none',
+  heroButton: {
+    marginTop: 18,
     background: '#118cff',
     color: 'white',
-    fontSize: 18,
+    textDecoration: 'none',
+    textAlign: 'center',
+    borderRadius: 16,
+    padding: 15,
     fontWeight: 900
   },
-  result: {
-    textAlign: 'center',
-    marginTop: 14,
-    fontWeight: 900
+  grid: {
+    marginTop: 18,
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 12
+  },
+  gameCard: {
+    background: '#101b27',
+    border: '1px solid #24384d',
+    borderRadius: 22,
+    padding: 16,
+    color: 'white',
+    textDecoration: 'none',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6
+  },
+  gameIcon: {
+    fontSize: 32
+  },
+  card: {
+    marginTop: 18,
+    background: '#101b27',
+    border: '1px solid #24384d',
+    borderRadius: 22,
+    padding: 16,
+    color: '#a8bac9'
   }
 };
