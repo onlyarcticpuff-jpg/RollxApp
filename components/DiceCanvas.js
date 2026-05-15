@@ -185,6 +185,19 @@ export default function DiceCanvas({
       const updateFromPointer = (event) => {
         const pos = event.global;
         const value = getValueFromX(pos.x);
+        const tickStep = Math.floor(value / 5);
+
+if (lastTickRef.current !== tickStep) {
+  lastTickRef.current = tickStep;
+
+  const tick = soundsRef.current.tick;
+  if (tick) {
+    tick.currentTime = 0;
+    tick.play().catch(() => {});
+  }
+
+  if (navigator.vibrate) navigator.vibrate(5);
+}
 
         currentTarget = value;
         drawTrack();
@@ -351,6 +364,20 @@ soundsRef.current.lose.volume = 0.35;
     r.phase = 'in';
     r.frame = 0;
     r.animating = true;
+    setTimeout(() => {
+  const sound = result === 'win'
+    ? soundsRef.current.win
+    : soundsRef.current.lose;
+
+  if (sound) {
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+  }
+
+  if (navigator.vibrate) {
+    navigator.vibrate(result === 'win' ? [20, 40, 20] : 20);
+  }
+}, 450);
   }, [rollKey]);
 
   return (
