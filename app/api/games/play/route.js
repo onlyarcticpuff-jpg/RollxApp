@@ -63,10 +63,12 @@ export async function POST(req) {
 
     switch (gameId) {
       case 'dice':
-        gameResult = playDice({
-          betAmount,
-          clientSeed
-        });
+      gameResult = playDice({
+  betAmount,
+  clientSeed,
+  target: body.target || 50.5,
+  condition: body.condition || 'over'
+});
         break;
 
       default:
