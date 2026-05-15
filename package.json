@@ -6,12 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
-{
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
     "next": "^15.5.18",
+    "pixi.js": "^8.2.6",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "pixi.js": "^8.2.6"
+    "react-dom": "^19.1.0"
   }
-  }
+}
