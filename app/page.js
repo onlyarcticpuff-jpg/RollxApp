@@ -115,14 +115,9 @@ export default function Home() {
           style={styles.input}
           type="number"
           value={bet}
-          onChange={(e) => setBet(Number(e.target.value))}
-        />
+          onChange={(e) => setBet(Number(e.target.value))} />
 
-        <div style={styles.quick}>
-          <button onClick={() => setBet(Math.max(1, bet / 2))}>½</button>
-          <button onClick={() => setBet(bet * 2)}>2×</button>
-          <button onClick={() => setBet(balance)}>MAX</button>
-        </div>
+        
 
         <label>Profit on Win</label>
         <div style={styles.profit}>{profitOnWin.toFixed(2)} credits</div>
@@ -132,7 +127,19 @@ export default function Home() {
         </button>
 
         {result && (
-          <div style={styles.result}>
+          <div style={styles<div style={styles.quick}>
+  <button style={styles.quickBtn} onClick={() => setBet(Math.max(1, bet / 2))}>
+    ½
+  </button>
+
+  <button style={styles.quickBtn} onClick={() => setBet(bet * 2)}>
+    2×
+  </button>
+
+  <button style={styles.quickBtn} onClick={() => setBet(balance)}>
+    MAX
+  </button>
+</div>.result}>
             {result.result === 'win' ? '🔥 WIN' : '💀 LOSS'} · Roll {Number(result.roll).toFixed(2)}
           </div>
         )}
