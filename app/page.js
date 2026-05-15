@@ -1,4 +1,4 @@
-import DiceCanvas from '@/components/DiceCanvas';
+import DiceCanvas from '../components/DiceCanvas';
 
 export default function Home() {
   return (
