@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 
+const lastTickRef = useRef(null);
+const soundsRef = useRef({});
+
 export default function DiceCanvas({
   target = 50.5,
   onTargetChange,
@@ -320,7 +323,16 @@ r.bubbleText.alpha = r.opacity;
     }
 
     setup();
+    
+soundsRef.current = {
+  tick: new Audio('/sounds/tick.mp3'),
+  win: new Audio('/sounds/win.mp3'),
+  lose: new Audio('/sounds/win.mp3')
+};
 
+soundsRef.current.tick.volume = 0.25;
+soundsRef.current.win.volume = 0.45;
+soundsRef.current.lose.volume = 0.35;
     return () => {
       if (app) app.destroy(true, true);
     };
