@@ -7,18 +7,16 @@ export default function Home() {
   const [tgUser, setTgUser] = useState(null);
   const [user, setUser] = useState(null);
   const [bet, setBet] = useState(100);
-  const [target, setTarget] = useState(50.5);
+  const [target] = useState(50.5);
   const [result, setResult] = useState(null);
+  const [rollKey, setRollKey] = useState(0);
   const [loading, setLoading] = useState(false);
-
-  const winChance = 100 - target;
-  const multiplier = 99 / winChance;
-  const profitOnWin = bet * multiplier - bet;
 
   async function loadUser(telegramId) {
     const res = await fetch(`/api/me?telegram_id=${telegramId}`);
     const data = await res.json();
-    setUser(data);
+
+    if (!data.error) setUser(data);
   }
 
   useEffect(() => {
@@ -27,7 +25,6 @@ export default function Home() {
     tg?.expand();
 
     const telegramUser = tg?.initDataUnsafe?.user;
-
     if (!telegramUser?.id) return;
 
     setTgUser(telegramUser);
@@ -60,7 +57,12 @@ export default function Home() {
     }
 
     setResult(data);
-    await loadUser(tgUser.id);
+    setRollKey((v) => v + 1);
+
+    setUser((prev) => ({
+      ...prev,
+      balance: data.balance
+    }));
   }
 
   if (!tgUser) {
@@ -72,18 +74,23 @@ export default function Home() {
     );
   }
 
+  const balance = Number(user?.balance || 0);
+  const winChance = 100 - target;
+  const multiplier = 99 / winChance;
+  const profitOnWin = Number(bet) * multiplier - Number(bet);
+
   return (
     <main style={styles.page}>
       <div style={styles.top}>
         <h1>RollX</h1>
-        <div style={styles.balance}>{Number(user?.balance || 0).toFixed(2)}</div>
+        <div style={styles.balance}>{balance.toFixed(2)}</div>
       </div>
 
       <DiceCanvas
-        roll={result?.roll || target}
         target={target}
-        condition="over"
+        roll={result?.roll}
         result={result?.result}
+        rollKey={rollKey}
       />
 
       <div style={styles.panel}>
@@ -113,14 +120,14 @@ export default function Home() {
         <div style={styles.quick}>
           <button onClick={() => setBet(Math.max(1, bet / 2))}>½</button>
           <button onClick={() => setBet(bet * 2)}>2×</button>
-          <button onClick={() => setBet(Number(user?.balance || 0))}>MAX</button>
+          <button onClick={() => setBet(balance)}>MAX</button>
         </div>
 
         <label>Profit on Win</label>
         <div style={styles.profit}>{profitOnWin.toFixed(2)} credits</div>
 
         <button style={styles.rollBtn} onClick={playDice} disabled={loading}>
-          {loading ? 'Rolling...' : 'Roll Dice'}
+          {loading ? 'Rolling...' : 'Bet'}
         </button>
 
         {result && (
@@ -162,7 +169,8 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr 1fr',
     gap: 8,
-    marginBottom: 16
+    marginBottom: 16,
+    fontSize: 12
   },
   input: {
     width: '100%',
@@ -172,7 +180,8 @@ const styles = {
     background: '#07131d',
     color: 'white',
     fontSize: 22,
-    margin: '8px 0 10px'
+    margin: '8px 0 10px',
+    boxSizing: 'border-box'
   },
   quick: {
     display: 'grid',
