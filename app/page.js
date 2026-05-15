@@ -7,7 +7,7 @@ export default function Home() {
   const [tgUser, setTgUser] = useState(null);
   const [user, setUser] = useState(null);
   const [bet, setBet] = useState(100);
-  const [target] = useState(50.5);
+  const [target, setTarget] = useState(50.5);
   const [result, setResult] = useState(null);
   const [rollKey, setRollKey] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -87,11 +87,12 @@ export default function Home() {
       </div>
 
       <DiceCanvas
-        target={target}
-        roll={result?.roll}
-        result={result?.result}
-        rollKey={rollKey}
-      />
+  target={target}
+  onTargetChange={setTarget}
+  roll={result?.roll}
+  result={result?.result}
+  rollKey={rollKey}
+/>
 
       <div style={styles.panel}>
         <div style={styles.stats}>
