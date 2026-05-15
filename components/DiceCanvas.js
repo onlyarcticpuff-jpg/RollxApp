@@ -191,8 +191,15 @@ if (lastTickRef.current !== tickStep) {
 
   const tick = soundsRef.current.tick;
   if (tick) {
-    tick.currentTime = 0;
-    tick.play().catch(() => {});
+    tick.pause();
+tick.currentTime = 0;
+
+tick.play().catch(() => {});
+
+setTimeout(() => {
+  tick.pause();
+  tick.currentTime = 0;
+}, 35);
   }
 
   if (navigator.vibrate) navigator.vibrate(5);
